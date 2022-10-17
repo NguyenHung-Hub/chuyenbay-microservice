@@ -1,0 +1,50 @@
+version: "3"
+services:
+    chuyenbayDB:
+        image: mysql
+        container_name: chuyenbayDB
+        ports:
+            - 3306:3306
+        volumes:
+            - ./data/chuyenbay_db:/var/lib/mysql
+        restart: always
+        environment:
+            MYSQL_ROOT_USER: root
+            MYSQL_ROOT_PASSWORD: 123456
+            MYSQL_DATABASE: chuyenbayDB
+
+    nhanvienDB:
+        container_name: nhanvienDB
+        image: mongo
+        restart: unless-stopped
+        depends_on:
+            - chuyenbayDB
+        volumes:
+            - ./data/nhanvien_chungnhan_db:/data/db
+            - ./data/mongoconfig:/data/configdb
+        working_dir: /home/mongodb
+        ports:
+            - "27017:27017"
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=root
+            - MONGO_INITDB_ROOT_PASSWORD=123456
+            - DB_PORT=27017
+            - DB_DATABASE=nhanvienDB
+            - DB_USERNAME=root
+            - DB_PASSWORD=123456
+    maybayDB:
+        image: "postgres:latest"
+        restart: always
+        container_name: maybayDB
+        depends_on:
+            - nhanvienDB
+        volumes:
+            - ./data/maybay_db:/home/postgreslocal/data
+        working_dir: /home/postgreslocal
+
+        ports:
+            - "5432:5432"
+        environment:
+            - POSTGRES_USER=root
+            - POSTGRES_PASSWORD=123456
+            - POSTGRES_DB=maybayDB
